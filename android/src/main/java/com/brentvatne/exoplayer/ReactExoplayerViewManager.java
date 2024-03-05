@@ -93,6 +93,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
     private static final String PROP_DEBUG = "debug";
 
+    private static final String PROPS_CURRENT_PAUSE_TIME = "currentPauseTime";
+
+
     private ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -147,6 +150,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         }
     }
+
+    @ReactProp(name = PROPS_CURRENT_PAUSE_TIME,  defaultDouble = 0.6)
+    public void setCurrentPauseTime(final ReactExoplayerView videoView, @Nullable ReadableMap currentPauseTime) {
+        Log.d(PROPS_CURRENT_PAUSE_TIME, "setCurrentPauseTime------start: ");
+        videoView.getCurrentFrame(currentPauseTime.getDouble("quantity"), currentPauseTime.getInt("pauseTime"));
+    }
+
 
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {

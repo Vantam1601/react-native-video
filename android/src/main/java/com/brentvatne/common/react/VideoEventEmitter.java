@@ -2,6 +2,7 @@ package com.brentvatne.common.react;
 
 import androidx.annotation.StringDef;
 
+import android.util.Log;
 import android.view.View;
 
 import com.brentvatne.common.api.TimedMetadata;
@@ -62,6 +63,8 @@ public class VideoEventEmitter {
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
+    private static final String EVENT_CURRENT_FRAME = "onCurrentFrame";
+
     static public final String[] Events = {
             EVENT_LOAD_START,
             EVENT_LOAD,
@@ -88,7 +91,8 @@ public class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
+            EVENT_ON_RECEIVE_AD_EVENT,
+            EVENT_CURRENT_FRAME
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -118,7 +122,8 @@ public class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
+            EVENT_ON_RECEIVE_AD_EVENT,
+            EVENT_CURRENT_FRAME
     })
     @interface VideoEvents {
     }
@@ -457,5 +462,13 @@ public class VideoEventEmitter {
         if(uiManager != null) {
            uiManager.receiveEvent(UIManagerHelper.getSurfaceId(mReactContext), viewId, type, event);
         }
+    }
+
+    public void sendLastFrame(String base64Image) {
+        WritableMap map = Arguments.createMap();
+        map.putString("base64", base64Image);
+
+        Log.d(EVENT_CURRENT_FRAME, "sendLastFrame: ");
+        receiveEvent(EVENT_CURRENT_FRAME, map);
     }
 }

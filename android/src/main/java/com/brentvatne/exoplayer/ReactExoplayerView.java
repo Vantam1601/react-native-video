@@ -10,12 +10,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.TextureView;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -661,6 +664,34 @@ public class ReactExoplayerView extends FrameLayout implements
         player.setPlaybackParameters(params);
         changeAudioOutput(this.audioOutput);
     }
+
+        public void getCurrentFrame(Double frameQuality, Integer currentPauseTime) {
+                Log.d(TAG, "getCurrentFrame: ");
+                if(frameQuality == null) return;
+                if(frameQuality > 1) frameQuality = 1.0;
+                frameQuality = (double) Math.round(frameQuality * 100);
+                Double finalFrameQuality = frameQuality;
+                ((Runnable) () -> {
+                        try {
+                               Log.d(TAG, "getCurrentFrame2222: ");
+
+                                        if (exoPlayerView.getVideoSurfaceView() instanceof TextureView) {
+                                        Bitmap bitmap = ((TextureView) exoPlayerView.getVideoSurfaceView()).getBitmap();
+                                        if(bitmap == null) return;
+                                        final String base64Image = ImageUtil.bitmapToString(bitmap);
+
+                                                Log.d(TAG, "getCurrentFrame33333: ");
+                                        eventEmitter.sendLastFrame(base64Image);
+                                    }else{
+                                        Log.d(TAG, "getCurrentFrame55555: ");
+                                    }
+                            } catch (Exception e) {
+                                Log.d(TAG, "getCurrentFrame44444: ");
+                                System.out.println(e.toString());
+                            }
+                    }).run();
+            }
+
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;

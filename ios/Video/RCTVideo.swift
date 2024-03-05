@@ -12,6 +12,8 @@ import React
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
     private var _player: AVPlayer?
     private var _playerItem: AVPlayerItem?
+    private var _playerOutput: AVPlayerItemVideoOutput?
+    
     private var _source: VideoSource?
     private var _playerBufferEmpty = true
     private var _playerLayer: AVPlayerLayer?
@@ -346,6 +348,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                             return self._videoCache.playerItemForSourceUsingCache(uri: source.uri, assetOptions: assetOptions)
                         }
                     #endif
+                    
+                    let settings: [AnyHashable: Any] = [kCVPixelBufferPixelFormatTypeKey as AnyHashable : kCVPixelFormatType_32BGRA]
+
+                    self._playerOutput = AVPlayerItemVideoOutput(pixelBufferAttributes: settings)
+               
 
                     if self._drm != nil || self._localSourceEncryptionKeyScheme != nil {
                         self._resouceLoaderDelegate = RCTResourceLoaderDelegate(
@@ -364,6 +371,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     self._player?.pause()
                     self._playerItem = playerItem
+                    self._playerItem.addOutput(self._playerOutput)
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                     self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
@@ -416,6 +424,42 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setLocalSourceEncryptionKeyScheme(_ keyScheme: String) {
         _localSourceEncryptionKeyScheme = keyScheme
+    }
+    
+    func base64StringFromPixelBuffer(_ pixelBuffer: CVPixelBuffer) -> String? {
+        // Convert CVPixelBuffer to CGImage
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
+            return nil
+        }
+        let image = UIImage(cgImage: cgImage)
+        
+        // Convert CGImage to Data
+        guard let imageData = image.jpegData(compressionQuality: 0.6) else {
+            return nil
+        }
+        
+        // Convert Data to base64 string
+        let base64String = imageData.base64EncodedString(options: [])
+        
+        // Clean up
+        cgImage.release()
+        
+        return base64String
+    }
+
+    func getCurrentFrame(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        if _playerItem.duration.value > 0 && _player.timeControlStatus == .playing {
+            if let pixelBuffer = _playerOutput.copyPixelBuffer(forItemTime: _playerItem.currentTime(), itemTimeForDisplay: nil) {
+                let base64Image = base64StringFromPixelBuffer(pixelBuffer)
+                resolve(["base64": base64Image ?? ""])
+            } else {
+                resolve(["base64": ""])
+            }
+        } else {
+            resolve(["base64": ""])
+        }
     }
 
     func playerItemPrepareText(asset: AVAsset!, assetOptions: NSDictionary?, uri: String) -> Promise<AVPlayerItem> {

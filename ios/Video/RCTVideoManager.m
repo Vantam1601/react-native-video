@@ -84,4 +84,8 @@ RCT_EXTERN_METHOD(presentFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
+RCT_EXTERN_METHOD(getCurrentFrame: (nonnull NSNumber*)paused reactTag:
+        (RCTPromiseResolveBlock)resolve resolver
+        (RCTPromiseRejectBlock)reject rejecter)
+
 @end
