@@ -349,9 +349,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         }
                     #endif
                     
-                    let settings: [AnyHashable: Any] = [kCVPixelBufferPixelFormatTypeKey as AnyHashable : kCVPixelFormatType_32BGRA]
+                
 
-                    self._playerOutput = AVPlayerItemVideoOutput(pixelBufferAttributes: settings)
+                    self._playerOutput = AVPlayerItemVideoOutput(pixelBufferAttributes: ["\(kCVPixelBufferPixelFormatTypeKey)": kCVPixelFormatType_32BGRA]);
                
 
                     if self._drm != nil || self._localSourceEncryptionKeyScheme != nil {
@@ -371,7 +371,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     self._player?.pause()
                     self._playerItem = playerItem
-                    self._playerItem.addOutput(self._playerOutput)
+                    
+                    if self._playerOutput != nil {
+                        self._playerItem?.add(self._playerOutput!)
+                    }
+                    
+//                    self._playerItem.addOutput(self._playerOutput)
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                     self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
@@ -443,13 +448,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         // Convert Data to base64 string
         let base64String = imageData.base64EncodedString(options: [])
         
+        
         // Clean up
-        cgImage.release()
+//        cgImage.release()
         
         return base64String
     }
 
     func getCurrentFrame(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        
+        guard let _playerItem = _playerItem,
+              let _player = _player,
+              let _playerOutput = _playerOutput else {
+            return
+        }
+        
         if _playerItem.duration.value > 0 && _player.timeControlStatus == .playing {
             if let pixelBuffer = _playerOutput.copyPixelBuffer(forItemTime: _playerItem.currentTime(), itemTimeForDisplay: nil) {
                 let base64Image = base64StringFromPixelBuffer(pixelBuffer)

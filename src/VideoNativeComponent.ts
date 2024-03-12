@@ -352,6 +352,7 @@ export interface VideoNativeProps extends ViewProps {
     event: NativeSyntheticEvent<OnExternalPlaybackChangeData>,
   ) => void;
   onGetLicense?: (event: NativeSyntheticEvent<OnGetLicenseData>) => void;
+  onCurrentFrame?:(event: NativeSyntheticEvent<any>) => void;
   onPictureInPictureStatusChanged?: (
     event: NativeSyntheticEvent<OnPictureInPictureStatusChangedData>,
   ) => void;

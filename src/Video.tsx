@@ -236,6 +236,31 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       })();
     }, []);
 
+  const setPauseTime = (currentPauseTime, quantity = 0.6) => {
+    
+    if (Platform.OS === 'ios') {
+      
+     } else {
+       nativeRef.current?.setNativeProps({
+        currentPauseTime: {
+          pauseTime: 1,
+          quantity,
+        },
+      });
+    }
+    
+  }
+    
+    const getCurrentFrame = async () => {
+      return await VideoManager.getCurrentFrame(getReactTag(nativeRef));
+    }
+      
+    const _onCurrentFrame = (event) => {
+      if (props.onLastFrame) {
+        props.onLastFrame(event.nativeEvent);
+      }
+    };
+
     const presentFullscreenPlayer = useCallback(() => {
       setIsFullscreen(true);
     }, [setIsFullscreen]);
@@ -480,6 +505,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
+        getCurrentFrame
       }),
       [
         seek,
@@ -489,6 +515,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
+        getCurrentFrame
       ],
     );
 
@@ -510,6 +537,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={onGetLicense}
+          onCurrentFrame={_onCurrentFrame}
           onVideoLoad={onVideoLoad}
           onVideoLoadStart={onVideoLoadStart}
           onVideoError={onVideoError}

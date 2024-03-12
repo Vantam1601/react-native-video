@@ -84,16 +84,16 @@ class RCTVideoManager: RCTViewManager {
         }
     }
     
-    @objc(getCurrentFrame:reactTag:resolver:rejecter:)
-        func getCurrentFrame(reactTag: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-            self.bridge.uiManager.prependUIBlock { _, viewRegistry in
-                guard let view = viewRegistry[reactTag] as? RCTVideo else {
-                    RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: \(viewRegistry[reactTag] ?? "nil")")
-                    return
-                }
-                view.getCurrentFrame(resolve: resolve, reject: reject)
+    @objc(getCurrentFrame:resolver:rejecter:)
+    func getCurrentFrame(reactTag: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        self.bridge.uiManager.prependUIBlock { _, viewRegistry in
+            guard let view = viewRegistry![reactTag] as? RCTVideo else {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo")
+                return
             }
+            view.getCurrentFrame(resolve: resolve, reject: reject)
         }
+    }
 
     override class func requiresMainQueueSetup() -> Bool {
         return true
